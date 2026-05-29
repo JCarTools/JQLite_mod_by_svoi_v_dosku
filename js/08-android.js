@@ -15,6 +15,8 @@ window.onAndroidEvent = function(type, data) {
       try { data = JSON.parse(trimmed); } catch(e) { return; }
     } else if (/^volume(changed)?$/i.test(typeNorm)) {
       try { data = JSON.parse(trimmed); } catch(e) { data = trimmed; }
+    } else if (/^(gps|weather)$/i.test(typeNorm)) {
+      try { data = JSON.parse(trimmed); } catch(e) { return; }
     } else {
       try { data = JSON.parse(trimmed); } catch(e) { return; }
     }
@@ -63,5 +65,17 @@ window.onAndroidEvent = function(type, data) {
       MuteManager.syncFromDevice();
       break;
     }
+    case 'gps':
+      WeatherManager.handleLocationData({
+        city: data.city || data.name || 'GPS',
+        latitude: data.latitude ?? data.lat ?? data.coords?.latitude,
+        longitude: data.longitude ?? data.lon ?? data.lng ?? data.coords?.longitude,
+        accuracy: data.accuracy ?? data.coords?.accuracy,
+        source: 'android-gps',
+      });
+      break;
+    case 'weather':
+      WeatherManager.applyAndroidWeather(data);
+      break;
   }
 };

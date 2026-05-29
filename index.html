@@ -24,10 +24,20 @@
       <button type="button" class="top-btn top-btn-scale" id="btn-scale" aria-label="Масштаб интерфейса: L">L</button>
       <span class="top-version">by @svoi_v_dosku</span>
     </div>
+    <div id="weather-widget" class="weather-widget" aria-label="Погода">
+      <div class="weather-widget-now">
+        <div id="weather-icon" class="weather-widget-icon" aria-hidden="true"></div>
+        <div class="weather-widget-meta">
+          <div id="weather-temp" class="weather-widget-temp">--°</div>
+          <div id="weather-desc" class="weather-widget-desc">—</div>
+        </div>
+      </div>
+      <div id="weather-forecast" class="weather-widget-forecast"></div>
+    </div>
     <div id="top-right">
       <div id="clock-block">
         <div id="clock">00:00</div>
-        <div id="date">1 января</div>
+        <div id="date">1 января · Ср</div>
       </div>
     </div>
   </div>
@@ -63,14 +73,14 @@
       </div>
     </div>
 
-    <div class="volume-row" id="volume-row">
-      <div class="card volume-block">
-        <div class="volume-controls" id="volume-controls"></div>
+    <!-- Нижние карточки -->
+    <div id="bottom">
+    <div class="card" id="card-driver">
+      <div id="body-driver">
+        <div class="seat-grid driver-grid" id="driver-grid"></div>
       </div>
     </div>
 
-    <!-- Нижние карточки -->
-    <div id="bottom" class="bottom-no-driver">
     <div class="card" id="card-apps">
       <div id="body-apps">
         <div class="my-grid" id="my-grid"></div>
@@ -79,35 +89,38 @@
 
     <div class="card" id="card-passenger">
       <div id="body-passenger" class="passenger-body">
+        <div class="seat-grid passenger-grid" id="passenger-grid"></div>
         <div class="passenger-vol" id="passenger-vol"></div>
       </div>
     </div>
     </div>
 
-    <div class="temp-row" id="temp-row">
-      <div class="card temp-block" id="temp-block-driver">
-        <div class="temp-controls">
-          <button type="button" class="temp-btn temp-btn-down" id="btn-driver-temp-down" aria-label="Температура водителя ниже">
-            <span class="temp-btn-icon temp-btn-icon-minus" aria-hidden="true"></span>
-          </button>
-          <div class="temp-display" id="temp-driver-value">—°</div>
-          <button type="button" class="temp-btn temp-btn-up" id="btn-driver-temp-up" aria-label="Температура водителя выше">
-            <span class="temp-btn-icon temp-btn-icon-plus" aria-hidden="true"></span>
-          </button>
+    <div id="dock-extra" class="dock-extra-hidden">
+      <div class="temp-row" id="temp-row">
+        <div class="card temp-block" id="temp-block-driver">
+          <div class="temp-controls">
+            <button type="button" class="temp-btn temp-btn-down" id="btn-driver-temp-down" aria-label="Температура водителя ниже">
+              <span class="temp-btn-icon temp-btn-icon-minus" aria-hidden="true"></span>
+            </button>
+            <div class="temp-display" id="temp-driver-value">—°</div>
+            <button type="button" class="temp-btn temp-btn-up" id="btn-driver-temp-up" aria-label="Температура водителя выше">
+              <span class="temp-btn-icon temp-btn-icon-plus" aria-hidden="true"></span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="card temp-block temp-block-sync" id="temp-block-sync">
-        <button type="button" class="temp-sync-btn" id="btn-temp-sync" aria-label="Синхронизировать пассажира с температурой водителя">SYNC</button>
-      </div>
-      <div class="card temp-block" id="temp-block-passenger">
-        <div class="temp-controls">
-          <button type="button" class="temp-btn temp-btn-down" id="btn-passenger-temp-down" aria-label="Температура пассажира ниже">
-            <span class="temp-btn-icon temp-btn-icon-minus" aria-hidden="true"></span>
-          </button>
-          <div class="temp-display" id="temp-passenger-value">—°</div>
-          <button type="button" class="temp-btn temp-btn-up" id="btn-passenger-temp-up" aria-label="Температура пассажира выше">
-            <span class="temp-btn-icon temp-btn-icon-plus" aria-hidden="true"></span>
-          </button>
+        <div class="card volume-block volume-block-center">
+          <div class="volume-controls" id="volume-controls"></div>
+        </div>
+        <div class="card temp-block" id="temp-block-passenger">
+          <div class="temp-controls">
+            <button type="button" class="temp-btn temp-btn-down" id="btn-passenger-temp-down" aria-label="Температура пассажира ниже">
+              <span class="temp-btn-icon temp-btn-icon-minus" aria-hidden="true"></span>
+            </button>
+            <div class="temp-display" id="temp-passenger-value">—°</div>
+            <button type="button" class="temp-btn temp-btn-up" id="btn-passenger-temp-up" aria-label="Температура пассажира выше">
+              <span class="temp-btn-icon temp-btn-icon-plus" aria-hidden="true"></span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -141,6 +154,7 @@
 <script src="js/05-temp.js"></script>
 <script src="js/06-apps.js"></script>
 <script src="js/07-layout.js"></script>
+<script src="js/10-weather.js"></script>
 <script src="js/08-android.js"></script>
 <script src="js/09-init.js"></script>
 </body>

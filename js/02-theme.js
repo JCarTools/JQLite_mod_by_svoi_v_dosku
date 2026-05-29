@@ -365,7 +365,7 @@ const ScaleManager = (() => {
 function updateClock() {
   const n = new Date();
   set("clock", String(n.getHours()).padStart(2,"0") + ":" + String(n.getMinutes()).padStart(2,"0"));
-  set("date", n.getDate() + " " + MONTHS[n.getMonth()]);
+  set("date", n.getDate() + " " + MONTHS[n.getMonth()] + " · " + WEEKDAYS[n.getDay()]);
 }
 setInterval(updateClock, 10000);
 updateClock();

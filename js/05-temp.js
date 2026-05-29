@@ -6,10 +6,8 @@ const TempManager = (() => {
   };
   const INVALID = -90;
   const MOCK = { driver: 22, passenger: 22.5 };
-  const SYNC_STEP_MS = 280;
   let pollTimer = null;
   let apiWaitTimer = null;
-  let syncing = false;
 
   function hasApi() {
     return !!window.androidApi;
@@ -159,64 +157,11 @@ const TempManager = (() => {
     refreshAfterCommand();
   }
 
-  function syncToDriver() {
-    if (syncing) return;
-
-    const temps = readTemps();
-    const target = temps.driver;
-    if (target == null) return;
-
-    syncing = true;
-    const btn = el('btn-temp-sync');
-    btn?.setAttribute('disabled', 'true');
-
-    const finish = () => {
-      syncing = false;
-      btn?.removeAttribute('disabled');
-      refreshAfterCommand();
-    };
-
-    if (!hasApi()) {
-      if (useMock()) MOCK.passenger = target;
-      finish();
-      return;
-    }
-
-    const current = temps.passenger;
-    if (current == null) {
-      syncing = false;
-      btn?.removeAttribute('disabled');
-      return;
-    }
-
-    const steps = Math.round(target - current);
-    if (steps === 0) {
-      finish();
-      return;
-    }
-
-    const cmd = steps > 0 ? 'Passenger_Temp_Up' : 'Passenger_Temp_Down';
-    const count = Math.abs(steps);
-    let done = 0;
-
-    const tick = () => {
-      if (done >= count) {
-        finish();
-        return;
-      }
-      run(cmd);
-      done += 1;
-      setTimeout(tick, SYNC_STEP_MS);
-    };
-    tick();
-  }
-
   function bind() {
     el('btn-driver-temp-down')?.addEventListener('click', () => adjust('driver', 'down'));
     el('btn-driver-temp-up')?.addEventListener('click', () => adjust('driver', 'up'));
     el('btn-passenger-temp-down')?.addEventListener('click', () => adjust('passenger', 'down'));
     el('btn-passenger-temp-up')?.addEventListener('click', () => adjust('passenger', 'up'));
-    el('btn-temp-sync')?.addEventListener('click', syncToDriver);
   }
 
   function stopPoll() {
@@ -267,5 +212,5 @@ const TempManager = (() => {
   bind();
   mountTempIcons();
 
-  return { startPoll, scheduleRefresh };
+  return { startPoll, stopPoll, scheduleRefresh };
 })();

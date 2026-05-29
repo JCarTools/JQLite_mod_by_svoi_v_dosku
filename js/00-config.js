@@ -9,11 +9,9 @@ let accent;
 
 // ── Часы ───────────────────────────────────────────────────
 const MONTHS = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const WEEKDAYS = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
 
 // ── Водитель / Пассажир ────────────────────────────────────
-/** Временно скрыты — восстановление: git revert или включить true. */
-const CLIMATE_ENABLED = false;
-
 const DRIVER_CONTROLS = [
   { id:'cl-seat-l',  icon:'icons/seat-heat.svg',  on:'heat_seat_l',  off:'heat_seat_l_0',  max:3 },
   { id:'cl-wheel',   icon:'icons/steering-wheel.svg', on:'heat_wheel_on', off:'heat_wheel_off', max:1 },
@@ -57,7 +55,7 @@ let pickerSlot = null;
 
 // ── Раскладка приложений ───────────────────────────────────
 const LAYOUT = {
-  driverCols: 0,
-  passengerCols: 1, // блок шторки
-  cardGaps: 1,
+  driverCols: 2,
+  passengerCols: 2, // сетка климата (1) + блок шторки (1)
+  cardGaps: 2,
 };
