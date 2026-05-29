@@ -1,5 +1,7 @@
 # Lite by @svoi_v_dosku
 
+![Lite by @svoi_v_dosku](img/screenshot.png)
+
 Лаунчер «чёрного экрана» для **JCarTools WebView**: плеер, климат, громкость, температура и быстрый запуск приложений. Работает в Android WebView через `window.androidApi`; в браузере без API доступны локальные настройки темы и акцента.
 
 ---
