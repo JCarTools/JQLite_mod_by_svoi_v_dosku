@@ -87,16 +87,17 @@ const MuteManager = (() => {
 
   function init() {
     const btn = el('btn-mute');
-    if (!btn) return;
+    if (!btn || btn.dataset.muteBound === '1') return;
+    btn.dataset.muteBound = '1';
     btn.innerHTML = buildClIcon('icons/mute-button.svg');
     btn.addEventListener('click', toggle);
     VolumeManager.subscribe(onVolumeChange);
     syncFromDevice();
   }
 
-  init();
-  return { syncFromDevice };
+  return { syncFromDevice, init };
 })();
 
+el('btn-prev')?.addEventListener('click', () => run('MEDIA_BLACK'));
 el('btn-next').addEventListener('click', () => run('MEDIA_NEXT'));
 el('btn-play').addEventListener('click', () => { run(isPlaying ? 'MEDIA_PAUSE' : 'MEDIA_PLAY'); setPlayState(!isPlaying); });
