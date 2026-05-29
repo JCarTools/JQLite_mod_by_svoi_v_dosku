@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lite by @svoi_v_dosku</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="bg"></div>
+
+<div id="root">
+
+  <!-- Верх -->
+  <div id="top">
+    <div id="top-left">
+      <button type="button" class="top-btn" id="btn-theme">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" font-family="Roboto, Segoe UI, sans-serif">A</text></svg>
+      </button>
+      <button type="button" class="top-btn top-btn-accent" id="btn-accent" aria-label="Цвет акцента">
+        <span class="accent-swatch" id="accent-swatch"></span>
+      </button>
+      <span class="top-version">by @svoi_v_dosku</span>
+    </div>
+    <div id="top-right">
+      <div id="clock-block">
+        <div id="clock">00:00</div>
+        <div id="date">1 января</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dock">
+    <!-- Плеер -->
+    <div id="player-row">
+      <div id="player">
+        <div class="player-controls">
+          <button type="button" class="ctrl-btn" id="btn-prev" aria-label="Предыдущий трек">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6l-8.5 6L18 18V6zM6 6h2v12H6z"/></svg>
+          </button>
+          <button type="button" class="ctrl-btn play" id="btn-play" aria-label="Воспроизведение">
+            <svg id="icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button type="button" class="ctrl-btn" id="btn-next" aria-label="Следующий трек">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
+          </button>
+        </div>
+        <div class="player-content">
+          <div class="player-info">
+            <div id="track-title">Не воспроизводится</div>
+            <div id="track-artist">—</div>
+            <div class="player-progress-row">
+              <span class="player-time" id="time-cur">0:00</span>
+              <div class="player-progress-bar"><div class="player-progress-fill" id="progress-fill"></div></div>
+              <span class="player-time" id="time-dur">0:00</span>
+            </div>
+          </div>
+          <img id="album-art" class="empty" src="img/music-placeholder.svg" alt="">
+        </div>
+      </div>
+    </div>
+
+    <!-- Нижние карточки -->
+    <div id="bottom">
+    <div class="card" id="card-driver">
+      <div id="body-driver">
+        <div class="seat-grid driver-grid" id="driver-grid"></div>
+      </div>
+    </div>
+
+    <div class="card" id="card-apps">
+      <div id="body-apps">
+        <div class="my-grid" id="my-grid"></div>
+      </div>
+    </div>
+
+    <div class="card" id="card-passenger">
+      <div id="body-passenger" class="passenger-body">
+        <div class="seat-grid passenger-grid" id="passenger-grid"></div>
+        <div class="passenger-vol" id="passenger-vol"></div>
+      </div>
+    </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Шторка приложений -->
+<div id="apps-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Приложения</span>
+    <button class="drawer-close" id="drawer-close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>
+  </div>
+  <div id="apps-grid"></div>
+</div>
+
+<!-- Палитра акцента -->
+<div id="accent-popup">
+  <div class="accent-btns" id="accent-btns"></div>
+</div>
+
+<script src="icons-data.js"></script>
+<script src="js/00-config.js"></script>
+<script src="js/01-utils.js"></script>
+<script src="js/02-theme.js"></script>
+<script src="js/03-player.js"></script>
+<script src="js/04-climate.js"></script>
+<script src="js/06-apps.js"></script>
+<script src="js/07-layout.js"></script>
+<script src="js/08-android.js"></script>
+<script src="js/09-init.js"></script>
+</body>
+</html>
