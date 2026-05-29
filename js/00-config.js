@@ -45,6 +45,12 @@ const SHUTTER_CONTROLS = [
   { id: 'btn-shutter-close', icon: 'icons/car-close.svg', cmd: 'CLOSE_SHTORKA', aria: 'Закрыть шторку' },
 ];
 
+const VOLUME_CENTER_CONTROLS = [
+  { id: 'btn-vol-down', icon: 'icons/volume-down.svg', aria: 'Тише', action: 'down' },
+  { id: 'btn-mute', icon: 'icons/mute-button.svg', aria: 'Без звука', action: 'mute' },
+  { id: 'btn-vol-up', icon: 'icons/volume-up.svg', aria: 'Громче', action: 'up' },
+];
+
 // ── Мои приложения ─────────────────────────────────────────
 const MY_SLOTS = 8;
 let pickerSlot = null;

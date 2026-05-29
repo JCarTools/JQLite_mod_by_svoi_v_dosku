@@ -289,6 +289,50 @@ button.cl-btn-vol {
   width: var(--shutter-icon-w);
   height: var(--shutter-icon-h);
 }
+
+.volume-controls .cl-btn-vol-media .cl-icon,
+.volume-controls .cl-btn-vol-media .cl-icon svg,
+.volume-controls .cl-btn-vol-media .cl-icon img {
+  width: var(--cl-control-icon-size);
+  height: var(--cl-control-icon-size);
+}
+
+.volume-row,
+#volume-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.volume-block {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.volume-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tile-grid-gap);
+}
+
+.volume-controls .cl-btn-vol {
+  width: var(--unified-tile-w, var(--seat-btn-w));
+  height: var(--tile-btn-h);
+}
+
+.volume-controls #btn-mute.active {
+  background: var(--accent-20);
+  border-color: var(--accent-50);
+}
+
+.volume-controls #btn-mute.active .cl-icon {
+  color: var(--accent);
+  opacity: 1;
+}
+
 .cl-btn-label {
   font-size: 15px;
   font-weight: 700;

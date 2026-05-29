@@ -109,3 +109,26 @@ function buildShutterControls() {
 }
 
 buildShutterControls();
+
+function buildCenterVolumeControls() {
+  const wrap = el('volume-controls');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  VOLUME_CENTER_CONTROLS.forEach(item => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cl-btn cl-btn-vol cl-btn-vol-media';
+    btn.id = item.id;
+    btn.setAttribute('aria-label', item.aria);
+    btn.innerHTML = buildClIcon(item.icon);
+    if (item.action === 'up') {
+      btn.addEventListener('click', () => VolumeManager.volumeUp());
+    } else if (item.action === 'down') {
+      btn.addEventListener('click', () => VolumeManager.volumeDown());
+    }
+    wrap.appendChild(btn);
+  });
+  MuteManager.init();
+}
+
+buildCenterVolumeControls();
