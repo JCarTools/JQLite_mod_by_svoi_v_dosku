@@ -1,0 +1,271 @@
+// ── Температура салона ─────────────────────────────────────
+const TempManager = (() => {
+  const CMD = {
+    driver: { up: 'Driver_Temp_Up', down: 'Driver_Temp_Down' },
+    passenger: { up: 'Passenger_Temp_Up', down: 'Passenger_Temp_Down' },
+  };
+  const INVALID = -90;
+  const MOCK = { driver: 22, passenger: 22.5 };
+  const SYNC_STEP_MS = 280;
+  let pollTimer = null;
+  let apiWaitTimer = null;
+  let syncing = false;
+
+  function hasApi() {
+    return !!window.androidApi;
+  }
+
+  function canFetchCarData() {
+    return typeof window.androidApi?.getCarData === 'function';
+  }
+
+  function useMock() {
+    return !hasApi() && loadLS('lite_temp_mock') === true;
+  }
+
+  function mockCarData(name) {
+    switch (name) {
+      case 'heat':
+        return {
+          name: 'heat',
+          rulHeat: false,
+          lobHeat: false,
+          zadHeat: false,
+          driverTemp: MOCK.driver,
+          passengerTemp: MOCK.passenger,
+        };
+      case 'cabinTemp':
+        return {
+          name: 'cabinTemp',
+          driverTemp: MOCK.driver,
+          passengerTemp: MOCK.passenger,
+        };
+      case 'driverTemp':
+        return { name: 'driverTemp', value: MOCK.driver };
+      case 'passengerTemp':
+        return { name: 'passengerTemp', value: MOCK.passenger };
+      default:
+        return { error: 'unknown_data' };
+    }
+  }
+
+  function fetchCarDataRaw(name) {
+    if (canFetchCarData()) {
+      ensureJsReady();
+      try {
+        return window.androidApi.getCarData(TOKEN, name) ?? null;
+      } catch (e) {
+        return null;
+      }
+    }
+    if (useMock()) {
+      try { return JSON.stringify(mockCarData(name)); } catch (e) { return null; }
+    }
+    return null;
+  }
+
+  function fetchCarData(name) {
+    const data = parseApiJson(fetchCarDataRaw(name));
+    if (!data) return null;
+    if (data.error) return null;
+    return data;
+  }
+
+  function normalizeTemp(value) {
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (!Number.isFinite(num) || num <= INVALID) return null;
+    return num;
+  }
+
+  function formatTemp(value) {
+    const temp = normalizeTemp(value);
+    if (temp == null) return '—°';
+    const rounded = Math.round(temp * 10) / 10;
+    if (Math.abs(rounded - Math.round(rounded)) < 0.05) return `${Math.round(rounded)}°`;
+    return `${rounded.toFixed(1)}°`;
+  }
+
+  function applyTemps(temps) {
+    set('temp-driver-value', formatTemp(temps.driver));
+    set('temp-passenger-value', formatTemp(temps.passenger));
+  }
+
+  function readTemps() {
+    ensureJsReady();
+    let driver = null;
+    let passenger = null;
+
+    const cabin = fetchCarData('cabinTemp');
+    if (cabin) {
+      driver = normalizeTemp(cabin.driverTemp);
+      passenger = normalizeTemp(cabin.passengerTemp);
+    }
+
+    if (driver == null || passenger == null) {
+      let heat = fetchCarData('heat');
+      if (!heat) {
+        const all = fetchCarData('all');
+        heat = all?.heat;
+      }
+      if (heat) {
+        if (driver == null) driver = normalizeTemp(heat.driverTemp);
+        if (passenger == null) passenger = normalizeTemp(heat.passengerTemp);
+      }
+    }
+
+    if (driver == null) {
+      const d = fetchCarData('driverTemp');
+      driver = normalizeTemp(d?.value ?? d?.driverTemp);
+    }
+    if (passenger == null) {
+      const p = fetchCarData('passengerTemp');
+      passenger = normalizeTemp(p?.value ?? p?.passengerTemp);
+    }
+
+    return { driver, passenger };
+  }
+
+  function refresh() {
+    const temps = readTemps();
+    applyTemps(temps);
+    return temps;
+  }
+
+  function refreshAfterCommand() {
+    refresh();
+    [120, 350, 700, 1200].forEach(ms => setTimeout(refresh, ms));
+  }
+
+  function mockAdjust(side, delta) {
+    const clamp = v => Math.max(16, Math.min(32, v));
+    const key = side === 'passenger' ? 'passenger' : 'driver';
+    MOCK[key] = clamp((MOCK[key] ?? 22) + delta);
+  }
+
+  function adjust(side, dir) {
+    const cmd = CMD[side]?.[dir];
+    if (!cmd) return;
+    const delta = dir === 'up' ? 1 : -1;
+
+    if (!hasApi()) {
+      if (useMock()) {
+        mockAdjust(side, delta);
+        refreshAfterCommand();
+      }
+      return;
+    }
+
+    run(cmd);
+    refreshAfterCommand();
+  }
+
+  function syncToDriver() {
+    if (syncing) return;
+
+    const temps = readTemps();
+    const target = temps.driver;
+    if (target == null) return;
+
+    syncing = true;
+    const btn = el('btn-temp-sync');
+    btn?.setAttribute('disabled', 'true');
+
+    const finish = () => {
+      syncing = false;
+      btn?.removeAttribute('disabled');
+      refreshAfterCommand();
+    };
+
+    if (!hasApi()) {
+      if (useMock()) MOCK.passenger = target;
+      finish();
+      return;
+    }
+
+    const current = temps.passenger;
+    if (current == null) {
+      syncing = false;
+      btn?.removeAttribute('disabled');
+      return;
+    }
+
+    const steps = Math.round(target - current);
+    if (steps === 0) {
+      finish();
+      return;
+    }
+
+    const cmd = steps > 0 ? 'Passenger_Temp_Up' : 'Passenger_Temp_Down';
+    const count = Math.abs(steps);
+    let done = 0;
+
+    const tick = () => {
+      if (done >= count) {
+        finish();
+        return;
+      }
+      run(cmd);
+      done += 1;
+      setTimeout(tick, SYNC_STEP_MS);
+    };
+    tick();
+  }
+
+  function bind() {
+    el('btn-driver-temp-down')?.addEventListener('click', () => adjust('driver', 'down'));
+    el('btn-driver-temp-up')?.addEventListener('click', () => adjust('driver', 'up'));
+    el('btn-passenger-temp-down')?.addEventListener('click', () => adjust('passenger', 'down'));
+    el('btn-passenger-temp-up')?.addEventListener('click', () => adjust('passenger', 'up'));
+    el('btn-temp-sync')?.addEventListener('click', syncToDriver);
+  }
+
+  function stopPoll() {
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+    if (apiWaitTimer) {
+      clearTimeout(apiWaitTimer);
+      apiWaitTimer = null;
+    }
+  }
+
+  function startPoll() {
+    stopPoll();
+    refresh();
+    if (canFetchCarData()) {
+      pollTimer = setInterval(refresh, 3000);
+      return;
+    }
+    if (useMock()) {
+      pollTimer = setInterval(refresh, 1000);
+      return;
+    }
+    const waitStarted = Date.now();
+    const retry = () => {
+      if (canFetchCarData()) {
+        pollTimer = setInterval(refresh, 3000);
+        return;
+      }
+      if (useMock()) {
+        pollTimer = setInterval(refresh, 1000);
+        return;
+      }
+      if (Date.now() - waitStarted < 30000) {
+        apiWaitTimer = setTimeout(retry, 500);
+      }
+    };
+    apiWaitTimer = setTimeout(retry, 500);
+  }
+
+  function scheduleRefresh() {
+    refresh();
+    [100, 300, 500, 1000, 1500, 3000].forEach(ms => setTimeout(refresh, ms));
+    [100, 500, 1500, 3000].forEach(ms => setTimeout(startPoll, ms));
+  }
+
+  bind();
+  mountTempIcons();
+
+  return { startPoll, scheduleRefresh };
+})();

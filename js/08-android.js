@@ -13,6 +13,8 @@ window.onAndroidEvent = function(type, data) {
       }
     } else if (typeNorm === 'musicinfo') {
       try { data = JSON.parse(trimmed); } catch(e) { return; }
+    } else if (/^volume(changed)?$/i.test(typeNorm)) {
+      try { data = JSON.parse(trimmed); } catch(e) { data = trimmed; }
     } else {
       try { data = JSON.parse(trimmed); } catch(e) { return; }
     }
@@ -52,5 +54,14 @@ window.onAndroidEvent = function(type, data) {
     case 'configurationchanged':
       ThemeManager.handleThemeEvent(typeNorm, data);
       break;
+    case 'volumechanged':
+    case 'volume': {
+      const vol = typeof data === 'object'
+        ? (data.volume ?? data.value ?? data.level ?? data.percent)
+        : data;
+      VolumeManager.handleVolumeFromSystem(vol);
+      MuteManager.syncFromDevice();
+      break;
+    }
   }
 };

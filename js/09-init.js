@@ -5,6 +5,10 @@ function notifyAndroidReady() {
 function bootAndroidBridge() {
   if (!window.androidApi) return;
   notifyAndroidReady();
+  VolumeManager.init();
+  TempManager.startPoll();
+  TempManager.scheduleRefresh();
+  MuteManager.syncFromDevice();
   ThemeManager.scheduleThemeRefresh();
 }
 

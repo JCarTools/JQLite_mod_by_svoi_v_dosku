@@ -324,6 +324,44 @@ function toggleAccentPopup() {
 
 ThemeManager.setMode(ThemeManager.getMode());
 
+const ScaleManager = (() => {
+  const MODES = ['l', 'm', 's'];
+  const LABELS = { l: 'L', m: 'M', s: 'S' };
+  let mode = loadLS('lite_ui_scale') || 'l';
+  if (!MODES.includes(mode)) mode = 'l';
+
+  function updateButton() {
+    const btn = el('btn-scale');
+    if (!btn) return;
+    const label = LABELS[mode];
+    btn.textContent = label;
+    btn.dataset.uiScale = mode;
+    btn.setAttribute('aria-label', `Масштаб интерфейса: ${label}`);
+  }
+
+  function apply() {
+    document.documentElement.dataset.uiScale = mode;
+    updateButton();
+    if (typeof updateAppsLayout === 'function') updateAppsLayout();
+  }
+
+  function setMode(next) {
+    if (!MODES.includes(next)) return;
+    mode = next;
+    saveLS('lite_ui_scale', mode);
+    apply();
+  }
+
+  function cycleMode() {
+    setMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length]);
+  }
+
+  el('btn-scale')?.addEventListener('click', cycleMode);
+  apply();
+
+  return { setMode, cycleMode, getMode: () => mode };
+})();
+
 function updateClock() {
   const n = new Date();
   set("clock", String(n.getHours()).padStart(2,"0") + ":" + String(n.getMinutes()).padStart(2,"0"));

@@ -21,6 +21,7 @@
       <button type="button" class="top-btn top-btn-accent" id="btn-accent" aria-label="Цвет акцента">
         <span class="accent-swatch" id="accent-swatch"></span>
       </button>
+      <button type="button" class="top-btn top-btn-scale" id="btn-scale" aria-label="Масштаб интерфейса: L">L</button>
       <span class="top-version">by @svoi_v_dosku</span>
     </div>
     <div id="top-right">
@@ -36,9 +37,7 @@
     <div id="player-row">
       <div id="player">
         <div class="player-controls">
-          <button type="button" class="ctrl-btn" id="btn-prev" aria-label="Предыдущий трек">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6l-8.5 6L18 18V6zM6 6h2v12H6z"/></svg>
-          </button>
+          <button type="button" class="ctrl-btn" id="btn-mute" aria-label="Без звука"></button>
           <button type="button" class="ctrl-btn play" id="btn-play" aria-label="Воспроизведение">
             <svg id="icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             <svg id="icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
@@ -84,6 +83,33 @@
     </div>
     </div>
 
+    <div class="temp-row" id="temp-row">
+      <div class="card temp-block" id="temp-block-driver">
+        <div class="temp-controls">
+          <button type="button" class="temp-btn temp-btn-down" id="btn-driver-temp-down" aria-label="Температура водителя ниже">
+            <span class="temp-btn-icon temp-btn-icon-minus" aria-hidden="true"></span>
+          </button>
+          <div class="temp-display" id="temp-driver-value">—°</div>
+          <button type="button" class="temp-btn temp-btn-up" id="btn-driver-temp-up" aria-label="Температура водителя выше">
+            <span class="temp-btn-icon temp-btn-icon-plus" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+      <div class="card temp-block temp-block-sync" id="temp-block-sync">
+        <button type="button" class="temp-sync-btn" id="btn-temp-sync" aria-label="Синхронизировать пассажира с температурой водителя">SYNC</button>
+      </div>
+      <div class="card temp-block" id="temp-block-passenger">
+        <div class="temp-controls">
+          <button type="button" class="temp-btn temp-btn-down" id="btn-passenger-temp-down" aria-label="Температура пассажира ниже">
+            <span class="temp-btn-icon temp-btn-icon-minus" aria-hidden="true"></span>
+          </button>
+          <div class="temp-display" id="temp-passenger-value">—°</div>
+          <button type="button" class="temp-btn temp-btn-up" id="btn-passenger-temp-up" aria-label="Температура пассажира выше">
+            <span class="temp-btn-icon temp-btn-icon-plus" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -108,8 +134,10 @@
 <script src="js/00-config.js"></script>
 <script src="js/01-utils.js"></script>
 <script src="js/02-theme.js"></script>
+<script src="js/03-volume.js"></script>
 <script src="js/03-player.js"></script>
 <script src="js/04-climate.js"></script>
+<script src="js/05-temp.js"></script>
 <script src="js/06-apps.js"></script>
 <script src="js/07-layout.js"></script>
 <script src="js/08-android.js"></script>
