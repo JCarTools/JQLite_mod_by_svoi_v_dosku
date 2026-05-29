@@ -87,8 +87,10 @@ function buildPassengerControls() {
   PASSENGER_CONTROLS.forEach(item => mountControl(item, grid));
 }
 
-buildDriverControls();
-buildPassengerControls();
+if (CLIMATE_ENABLED) {
+  buildDriverControls();
+  buildPassengerControls();
+}
 
 function buildShutterControls() {
   const wrap = el('passenger-vol');

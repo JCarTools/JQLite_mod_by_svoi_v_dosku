@@ -225,6 +225,11 @@ html[data-theme="light"] body {
   width: 100%;
 }
 
+#bottom.bottom-no-driver {
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "apps passenger";
+}
+
 #bottom {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -298,6 +303,13 @@ button.cl-btn-vol {
   grid-template-columns: repeat(var(--apps-grid-cols), minmax(0, 1fr));
   gap: var(--apps-grid-gap);
   grid-auto-rows: minmax(var(--app-slot-min-h), var(--app-slot-h));
+}
+
+#root.apps-stacked #bottom.bottom-no-driver {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "apps"
+    "passenger";
 }
 
 #root.apps-stacked #bottom {
