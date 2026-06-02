@@ -20,13 +20,9 @@ const ThemeManager = (() => {
   let systemTheme = 'dark';
 
   function updateThemeButton() {
-    const btn = el('btn-theme');
-    const meta = META[mode];
-    if (!btn || !meta) return;
-    btn.removeAttribute('title');
-    btn.dataset.themeMode = mode;
-    const inner = meta.svg || `<path d="${meta.path}"/>`;
-    btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">${inner}</svg>`;
+    document.querySelectorAll('input[name="settings-theme"]').forEach(input => {
+      input.checked = input.value === mode;
+    });
   }
 
   const DARK_METHODS = /^(isDark|isDarkMode|getDarkMode|getDark)$/i;
@@ -286,14 +282,6 @@ function applyAccent(color) {
   saveLS('lite_accent', color);
 }
 
-function closeAccentPopup() {
-  el('accent-popup')?.classList.remove('open');
-}
-
-function toggleAccentPopup() {
-  el('accent-popup')?.classList.toggle('open');
-}
-
 (function initAccent() {
   const container = el('accent-btns');
   if (!container) return;
@@ -305,21 +293,10 @@ function toggleAccentPopup() {
     dot.style.background = color;
     dot.addEventListener('click', () => {
       applyAccent(color);
-      closeAccentPopup();
     });
     container.appendChild(dot);
   });
   applyAccent(accent);
-
-  el('btn-accent')?.addEventListener('click', e => {
-    e.stopPropagation();
-    toggleAccentPopup();
-  });
-  document.addEventListener('click', e => {
-    if (!el('accent-popup')?.classList.contains('open')) return;
-    if (e.target.closest('#accent-popup') || e.target.closest('#btn-accent')) return;
-    closeAccentPopup();
-  });
 })();
 
 ThemeManager.setMode(ThemeManager.getMode());
@@ -331,12 +308,9 @@ const ScaleManager = (() => {
   if (!MODES.includes(mode)) mode = 'l';
 
   function updateButton() {
-    const btn = el('btn-scale');
-    if (!btn) return;
-    const label = LABELS[mode];
-    btn.textContent = label;
-    btn.dataset.uiScale = mode;
-    btn.setAttribute('aria-label', `Масштаб интерфейса: ${label}`);
+    document.querySelectorAll('input[name="settings-scale"]').forEach(input => {
+      input.checked = input.value === mode;
+    });
   }
 
   function apply() {
@@ -356,10 +330,22 @@ const ScaleManager = (() => {
     setMode(MODES[(MODES.indexOf(mode) + 1) % MODES.length]);
   }
 
-  el('btn-scale')?.addEventListener('click', cycleMode);
   apply();
 
   return { setMode, cycleMode, getMode: () => mode };
+})();
+
+(function initSettingsInputs() {
+  document.querySelectorAll('input[name="settings-theme"]').forEach(input => {
+    input.addEventListener('change', () => {
+      if (input.checked) ThemeManager.setMode(input.value);
+    });
+  });
+  document.querySelectorAll('input[name="settings-scale"]').forEach(input => {
+    input.addEventListener('change', () => {
+      if (input.checked) ScaleManager.setMode(input.value);
+    });
+  });
 })();
 
 function updateClock() {

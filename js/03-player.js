@@ -35,11 +35,17 @@ function setPlayState(playing) {
 const MuteManager = (() => {
   let userMuted = false;
   let savedVolume = null;
+  let restoreTarget = null;
   let toggleLock = false;
 
-  function updateUI() {
+  function renderVolume(v) {
     const btn = el('btn-mute');
     if (!btn) return;
+    const value = userMuted
+      ? (savedVolume != null && savedVolume > 0 ? savedVolume : clampMediaVolume(v))
+      : clampMediaVolume(v);
+    const label = btn.querySelector('.volume-percent');
+    if (label) label.textContent = `${value ?? 0}%`;
     btn.classList.toggle('active', userMuted);
     btn.setAttribute('aria-label', userMuted ? 'Включить звук' : 'Без звука');
     btn.setAttribute('aria-pressed', userMuted ? 'true' : 'false');
@@ -52,44 +58,46 @@ const MuteManager = (() => {
 
     if (userMuted) {
       userMuted = false;
-      if (savedVolume != null && savedVolume > 0) {
-        VolumeManager.setVolume(savedVolume);
+      restoreTarget = savedVolume != null && savedVolume > 0 ? savedVolume : 5;
+      if (restoreTarget > 0) {
+        VolumeManager.setVolume(restoreTarget);
       }
-      savedVolume = null;
     } else {
       const current = VolumeManager.getVolume();
       if (current > 0) savedVolume = current;
       userMuted = true;
+      restoreTarget = null;
       VolumeManager.setVolume(0);
     }
-    updateUI();
+    renderVolume(VolumeManager.getVolume());
   }
 
   function syncFromDevice() {
     if (userMuted) return;
-    VolumeManager.fetchVolume();
     if (VolumeManager.getVolume() === 0) {
       userMuted = true;
-      updateUI();
+      renderVolume(0);
     }
   }
 
   function onVolumeChange(v) {
+    if (v > 0) savedVolume = v;
     if (userMuted && v > 0) {
       userMuted = false;
-      savedVolume = null;
-      updateUI();
+      restoreTarget = null;
     } else if (!userMuted && v === 0) {
       userMuted = true;
-      updateUI();
+    } else if (!userMuted && restoreTarget != null && v === restoreTarget) {
+      restoreTarget = null;
     }
+    renderVolume(v);
   }
 
   function init() {
     const btn = el('btn-mute');
     if (!btn || btn.dataset.muteBound === '1') return;
     btn.dataset.muteBound = '1';
-    btn.innerHTML = buildClIcon('icons/mute-button.svg');
+    btn.innerHTML = '<span class="volume-percent" aria-hidden="true">50%</span>';
     btn.addEventListener('click', toggle);
     VolumeManager.subscribe(onVolumeChange);
     syncFromDevice();

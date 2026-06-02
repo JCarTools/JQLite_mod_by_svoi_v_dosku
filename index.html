@@ -15,13 +15,12 @@
   <!-- Верх -->
   <div id="top">
     <div id="top-left">
-      <button type="button" class="top-btn" id="btn-theme">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" font-family="Roboto, Segoe UI, sans-serif">A</text></svg>
+      <button type="button" class="top-btn top-btn-settings" id="btn-settings" aria-label="Настройки">
+        <svg width="22" height="22" viewBox="-2 -2 28 28" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z"/>
+          <path d="M18.5 12a6.5 6.5 0 0 0-.08-1.02l2.02-1.55-1.9-3.3-2.36.94a6.7 6.7 0 0 0-1.76-1.02L14.05 3h-3.8l-.37 3.05c-.63.24-1.22.59-1.76 1.02l-2.36-.94-1.9 3.3 2.02 1.55a6.7 6.7 0 0 0 0 2.04l-2.02 1.55 1.9 3.3 2.36-.94c.54.43 1.13.78 1.76 1.02l.37 3.05h3.8l.37-3.05c.63-.24 1.22-.59 1.76-1.02l2.36.94 1.9-3.3-2.02-1.55c.05-.33.08-.67.08-1.02Z"/>
+        </svg>
       </button>
-      <button type="button" class="top-btn top-btn-accent" id="btn-accent" aria-label="Цвет акцента">
-        <span class="accent-swatch" id="accent-swatch"></span>
-      </button>
-      <button type="button" class="top-btn top-btn-scale" id="btn-scale" aria-label="Масштаб интерфейса: L">L</button>
       <span class="top-version">by @svoi_v_dosku</span>
     </div>
     <div id="weather-widget" class="weather-widget" aria-label="Погода">
@@ -95,7 +94,7 @@
     </div>
     </div>
 
-    <div id="dock-extra" class="dock-extra-hidden">
+    <div id="dock-extra">
       <div class="temp-row" id="temp-row">
         <div class="card temp-block" id="temp-block-driver">
           <div class="temp-controls">
@@ -108,7 +107,7 @@
             </button>
           </div>
         </div>
-        <div class="card volume-block volume-block-center">
+        <div class="card volume-block volume-block-center" id="volume-block-center">
           <div class="volume-controls" id="volume-controls"></div>
         </div>
         <div class="card temp-block" id="temp-block-passenger">
@@ -139,9 +138,55 @@
   <div id="apps-grid"></div>
 </div>
 
-<!-- Палитра акцента -->
-<div id="accent-popup">
-  <div class="accent-btns" id="accent-btns"></div>
+<!-- Настройки -->
+<div id="settings-backdrop" class="settings-hidden">
+  <div id="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-header">
+      <div id="settings-title">Настройки</div>
+      <button type="button" class="settings-close" id="settings-close" aria-label="Закрыть настройки">×</button>
+    </div>
+
+    <div class="settings-body">
+      <div class="settings-row">
+        <div class="settings-label">Тема</div>
+        <div class="settings-segment" id="settings-theme">
+          <label><input type="radio" name="settings-theme" value="auto"><span>Авто</span></label>
+          <label><input type="radio" name="settings-theme" value="light"><span>Светлая</span></label>
+          <label><input type="radio" name="settings-theme" value="dark"><span>Темная</span></label>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">Цвет</div>
+        <div class="accent-btns" id="accent-btns"></div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">Размер</div>
+        <div class="settings-segment" id="settings-scale">
+          <label><input type="radio" name="settings-scale" value="l"><span>L</span></label>
+          <label><input type="radio" name="settings-scale" value="m"><span>M</span></label>
+          <label><input type="radio" name="settings-scale" value="s"><span>S</span></label>
+        </div>
+      </div>
+
+      <div class="settings-switch-row">
+        <div class="settings-label">Громкость</div>
+        <label class="settings-switch">
+          <input type="checkbox" id="settings-volume">
+          <span></span>
+        </label>
+      </div>
+
+      <div class="settings-switch-row">
+        <div class="settings-label">Температура</div>
+        <label class="settings-switch">
+          <input type="checkbox" id="settings-climate">
+          <span></span>
+        </label>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="icons-data.js"></script>
@@ -155,6 +200,7 @@
 <script src="js/06-apps.js"></script>
 <script src="js/07-layout.js"></script>
 <script src="js/10-weather.js"></script>
+<script src="js/11-dashboard-settings.js"></script>
 <script src="js/08-android.js"></script>
 <script src="js/09-init.js"></script>
 </body>

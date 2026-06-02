@@ -1,9 +1,10 @@
 // ── Громкость (setvol + echo-suppress, fallback runEnum) ───
 const VolumeManager = (() => {
-  const ECHO_SUPPRESS_MS = 4000;
+  const ECHO_SUPPRESS_MS = 1600;
   const VOL_STEP = 5;
-  const STUCK_VOL = 48;
   const ENUM_STEP_MS = 90;
+  const DIRECT_COMMIT_MS = 180;
+  const POLL_MS = 1000;
 
   let currentVolume = 50;
   let lastSetValue = null;
@@ -11,6 +12,10 @@ const VolumeManager = (() => {
   let mode = null;
   let modeResolved = false;
   let enumTimer = null;
+  let commitTimer = null;
+  let pendingVolume = null;
+  let pollTimer = null;
+  let initialized = false;
   let callbacks = [];
 
   function isSuppressing() {
@@ -30,15 +35,22 @@ const VolumeManager = (() => {
     return clampMediaVolume(raw);
   }
 
-  function fetchVolume() {
-    const v = readRawVolume();
+  function applyVolume(v, options = {}) {
     if (v == null) return currentVolume;
-    if (isSuppressing() && v !== lastSetValue) return currentVolume;
+    if (!options.force && pendingVolume != null) return currentVolume;
+    if (!options.force && isSuppressing() && v !== lastSetValue) return currentVolume;
     if (v !== currentVolume) {
       currentVolume = v;
       notify();
     }
+    if (lastSetValue === v) {
+      lastSetValue = null;
+    }
     return currentVolume;
+  }
+
+  function fetchVolume(options = {}) {
+    return applyVolume(readRawVolume(), options);
   }
 
   function resolveMode() {
@@ -68,6 +80,31 @@ const VolumeManager = (() => {
   function setVolumeDirect(value) {
     const v = clampMediaVolume(value);
     if (v == null) return;
+    pendingVolume = v;
+    if (v !== currentVolume) {
+      currentVolume = v;
+      notify();
+    }
+    if (commitTimer) clearTimeout(commitTimer);
+    commitTimer = setTimeout(() => {
+      commitTimer = null;
+      const target = pendingVolume;
+      pendingVolume = null;
+      if (target == null) return;
+      lastSetValue = target;
+      lastSetTime = Date.now();
+      callVolApi('setvol', target) ?? callVolApi('setVolume', target);
+    }, DIRECT_COMMIT_MS);
+  }
+
+  function setVolumeDirectNow(value) {
+    const v = clampMediaVolume(value);
+    if (v == null) return;
+    if (commitTimer) {
+      clearTimeout(commitTimer);
+      commitTimer = null;
+    }
+    pendingVolume = null;
     lastSetValue = v;
     lastSetTime = Date.now();
     callVolApi('setvol', v) ?? callVolApi('setVolume', v);
@@ -140,49 +177,49 @@ const VolumeManager = (() => {
   }
 
   function probeMode() {
-    if (!hasVolApi()) return;
     const cached = loadLS('lite_vol_mode');
     if (cached === 'direct' || cached === 'enum') {
       mode = cached;
       modeResolved = true;
       return;
     }
-
-    const before = readRawVolume();
-    if (before == null) return;
-
-    const target = before <= 35 ? Math.min(100, before + 15) : 30;
-    callVolApi('setvol', target);
-    lastSetValue = target;
-    lastSetTime = Date.now();
-
-    setTimeout(() => {
-      const after = readRawVolume();
-      if (after == null) return;
-      if (after === target || Math.abs(after - target) <= 2) {
-        setMode('direct');
-        currentVolume = after;
-        notify();
-      } else if (after === STUCK_VOL || (after === before && after !== target)) {
-        setMode('enum');
-      }
-      lastSetValue = null;
-    }, 350);
+    setMode('direct');
   }
 
   function handleVolumeFromSystem(volume) {
     const v = clampMediaVolume(volume ?? parseApiNumber(volume));
     if (v == null) return;
-    lastSetValue = null;
+    if (pendingVolume != null) return;
+    if (isSuppressing() && v !== lastSetValue) return;
     if (v !== currentVolume) {
       currentVolume = v;
       notify();
     }
+    if (lastSetValue === v) {
+      lastSetValue = null;
+    }
+  }
+
+  function startPolling() {
+    if (pollTimer || !hasVolApi()) return;
+    pollTimer = setInterval(() => fetchVolume(), POLL_MS);
+  }
+
+  function stopPolling() {
+    if (!pollTimer) return;
+    clearInterval(pollTimer);
+    pollTimer = null;
   }
 
   function init() {
-    fetchVolume();
+    if (initialized) {
+      startPolling();
+      return;
+    }
+    initialized = true;
     probeMode();
+    fetchVolume({ force: true });
+    startPolling();
   }
 
   return {
@@ -190,10 +227,13 @@ const VolumeManager = (() => {
     fetchVolume,
     getVolume: () => currentVolume,
     setVolume,
+    setVolumeNow: setVolumeDirectNow,
     volumeUp,
     volumeDown,
     handleVolumeFromSystem,
     getMode,
+    startPolling,
+    stopPolling,
     subscribe(cb) {
       if (typeof cb !== 'function') return () => {};
       callbacks.push(cb);
