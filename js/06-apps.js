@@ -61,7 +61,3 @@ function openDrawer() {
 
 function closeDrawer() { el('apps-drawer').classList.remove('open'); pickerSlot = null; }
 el('drawer-close').addEventListener('click', closeDrawer);
-
-(function initTopTheme() {
-  el('btn-theme')?.addEventListener('click', () => ThemeManager.cycleMode());
-})();

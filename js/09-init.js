@@ -6,7 +6,6 @@ function bootAndroidBridge() {
   if (!window.androidApi) return;
   notifyAndroidReady();
   VolumeManager.init();
-  MuteManager.syncFromDevice();
   ThemeManager.scheduleThemeRefresh();
 }
 
@@ -50,11 +49,6 @@ startBridgeWatcher();
 waitForAndroidApi(() => bootAndroidBridge());
 
 const DockExtraReveal = (() => {
-  const REQUIRED_TAPS = 5;
-  const RESET_MS = 2000;
-  let taps = 0;
-  let resetTimer = null;
-
   function isVisible() {
     const node = el('dock-extra');
     return !!node && !node.classList.contains('dock-extra-hidden');
@@ -64,25 +58,19 @@ const DockExtraReveal = (() => {
     const node = el('dock-extra');
     if (!node) return;
     node.classList.toggle('dock-extra-hidden', !show);
+    if (typeof DashboardSettings !== 'undefined') DashboardSettings.apply();
     if (show) {
-      TempManager.scheduleRefresh();
+      const climateVisible = typeof DashboardSettings === 'undefined' || DashboardSettings.isClimateVisible();
+      if (climateVisible) TempManager.scheduleRefresh();
     } else {
       TempManager.stopPoll();
     }
   }
 
-  function onClockTap() {
-    taps += 1;
-    clearTimeout(resetTimer);
-    resetTimer = setTimeout(() => { taps = 0; }, RESET_MS);
-    if (taps >= REQUIRED_TAPS) {
-      taps = 0;
-      clearTimeout(resetTimer);
-      setVisible(!isVisible());
-    }
-  }
-
-  el('clock-block')?.addEventListener('click', onClockTap);
-
   return { isVisible, setVisible };
 })();
+
+if (DockExtraReveal.isVisible()) {
+  const climateVisible = typeof DashboardSettings === 'undefined' || DashboardSettings.isClimateVisible();
+  if (climateVisible) TempManager.scheduleRefresh();
+}

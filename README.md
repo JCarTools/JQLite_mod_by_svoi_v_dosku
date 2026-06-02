@@ -1,6 +1,7 @@
 # Lite by @svoi_v_dosku
 
-![Lite by @svoi_v_dosku](img/screenshot.png)
+![Lite by @svoi_v_dosku — dark](img/screenshot-dark.png)
+![Lite by @svoi_v_dosku — light](img/screenshot-light.png)
 
 Лаунчер «чёрного экрана» для **JCarTools WebView**: плеер, климат, громкость, температура и быстрый запуск приложений. Работает в Android WebView через `window.androidApi`; в браузере без API доступны локальные настройки темы и акцента.
 
@@ -22,11 +23,12 @@
 
 | Кнопка / UI | Расположение | Действие | API / команда |
 | --- | --- | --- | --- |
-| **Тема** `#btn-theme` | Верх слева | Циклическое переключение режима: **auto → dark → light → auto**. Сохраняет в `localStorage` (`lite_theme_mode`). В режиме **auto** читает тему через `androidApi` (`getTheme`, `getUiMode`, …) после `onJsReady`, с fallback на `prefers-color-scheme`; опрос каждые 2 с и повторные чтения после `onJsReady` | Локально: `document.documentElement.dataset.theme`. События Android: `theme` (`mode`), `uimode`, `nightmode`, `configurationchanged` и др. → `ThemeManager.handleThemeEvent`; также `window.onSystemThemeChange` / `onThemeChange` / `onUiModeChange` |
-| **Акцент** `#btn-accent` | Верх слева, рядом с темой | Открывает/закрывает палитру акцента `#accent-popup` | — |
-| **Точка цвета** `.accent-dot` (×8) | Попап `#accent-btns` | Выбирает цвет акцента, обновляет CSS-переменные `--accent*`, сохраняет в `localStorage` (`lite_accent`), закрывает попап | — |
-| **Масштаб** `#btn-scale` | Верх слева, рядом с акцентом | Циклическое переключение **L → M → S → L**. Масштабирует кнопки, часы, шрифты и отступы через `--ui-scale`; сетка и колонки не меняются | Локально: `document.documentElement.dataset.uiScale`, `localStorage` (`lite_ui_scale`) |
-| **Закрытие попапа акцента** | Клик вне `#accent-popup` и `#btn-accent` | Скрывает палитру | — |
+| **Настройки** `#btn-settings` | Верх слева | Открывает диалог `#settings-dialog` | — |
+| **Тема** `settings-theme` | Диалог настроек | Radio: **Авто / Светлая / Темная**. В режиме auto читает системную тему через Android API или `prefers-color-scheme` | Локально: `lite_theme_mode`; Android события темы → `ThemeManager.handleThemeEvent` |
+| **Цвет** `.accent-dot` (×16) | Диалог настроек | Выбирает цвет акцента, обновляет CSS-переменные `--accent*`, сохраняет в `localStorage`; сетка занимает ширину диалога и масштабируется вместе с UI | Локально: `lite_accent` |
+| **Размер** `settings-scale` | Диалог настроек | Radio: **L / M / S**. Масштабирует кнопки, часы, шрифты и отступы через `--ui-scale`; сетка и колонки не меняются | Локально: `lite_ui_scale` |
+| **Громкость** `#settings-volume` | Диалог настроек | Switch показывает/скрывает блок громкости нижней строки `#volume-block-center` | Локально: `lite_show_volume_controls` |
+| **Температура** `#settings-climate` | Диалог настроек | Switch показывает/скрывает только нижние температурные блоки. Карточки сидений водителя и пассажира не скрываются | Локально: `lite_show_climate_controls` |
 
 ---
 
@@ -34,7 +36,7 @@
 
 | Кнопка / UI | Расположение | Действие | API / команда |
 | --- | --- | --- | --- |
-| **Mute** `#btn-mute` | Плеер, слева | Mute/unmute через `VolumeManager`: `setvol` + echo-suppression (4 с), fallback `runEnum` | `getvol` / `setvol`, событие `volumeChanged` |
+| **Mute / процент** `#btn-mute` | Нижний ряд, центр | Показывает текущий процент громкости. Нажатие включает/выключает mute; в mute процент перечёркнут. Восстановление громкости идёт через `VolumeManager` с echo-suppression | `getvol` / `setvol`, polling 1 с, событие `volumeChanged` |
 | **Play / Pause** `#btn-play` | Плеер, центр | Переключает иконку play/pause и отправляет команду воспроизведения | `runEnum(TOKEN, "MEDIA_PLAY")` или `"MEDIA_PAUSE"`. Состояние также обновляется событием `musicInfo` |
 | **Next** `#btn-next` | Плеер, справа | Следующий трек | `runEnum(TOKEN, "MEDIA_NEXT")` |
 
@@ -68,10 +70,10 @@
 | --- | --- | --- | --- |
 | **Темп. водителя −** `#btn-driver-temp-down` | Нижний ряд, слева | −1° | `runEnum(TOKEN, "Driver_Temp_Down")` |
 | **Темп. водителя +** `#btn-driver-temp-up` | Нижний ряд, слева | +1° | `runEnum(TOKEN, "Driver_Temp_Up")` |
-| **SYNC** `#btn-temp-sync` | Нижний ряд, центр | Выравнивает температуру пассажира с водителем (пошагово) | `Passenger_Temp_Up` / `Passenger_Temp_Down` |
 | **Темп. пассажира −** `#btn-passenger-temp-down` | Нижний ряд, справа | −1° | `runEnum(TOKEN, "Passenger_Temp_Down")` |
 | **Темп. пассажира +** `#btn-passenger-temp-up` | Нижний ряд, справа | +1° | `runEnum(TOKEN, "Passenger_Temp_Up")` |
 | **Дисплеи** `#temp-driver-value`, `#temp-passenger-value` | Между кнопками ± | Текущие значения, опрос каждые 3 с | `getCarData(TOKEN, "cabinTemp")` / `"heat"` / `"driverTemp"` / `"passengerTemp"` |
+| **Нижняя строка** `#dock-extra` | Под нижними карточками | Видна по умолчанию; отдельного раскрытия по часам нет | — |
 
 ---
 
@@ -101,7 +103,7 @@
 | Раздел | Команды |
 | --- | --- |
 | Плеер | `MEDIA_PLAY`, `MEDIA_PAUSE`, `MEDIA_NEXT`, `Volume_Up`, `Volume_Down` |
-| Громкость | `getvol`, `setvol` (чтение; управление — через `Volume_Up`/`Volume_Down`) |
+| Громкость | `getvol`, `setvol` (чтение и direct-управление; fallback — через `Volume_Up`/`Volume_Down`) |
 | Водитель — сиденье | `heat_seat_l_0` … `heat_seat_l_3` |
 | Водитель — руль | `heat_wheel_on`, `heat_wheel_off` |
 | Водитель — вентиляция | `vent_seat_l_0` … `vent_seat_l_3` |
@@ -119,5 +121,7 @@
 | `lite_theme_mode` | `dark` / `light` / `auto` |
 | `lite_accent` | HEX цвет акцента |
 | `lite_ui_scale` | `l` / `m` / `s` — масштаб интерфейса |
+| `lite_show_volume_controls` | `true` / `false` — показывать блок громкости в нижней строке |
+| `lite_show_climate_controls` | `true` / `false` — показывать нижние температурные блоки |
 | `lite_my_1` … `lite_my_8` | Сохранённые приложения в слотах |
 | `lite_temp_mock` | `"1"` — mock температур в браузере без API |

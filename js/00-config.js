@@ -4,7 +4,11 @@ const TOKEN = "SECURE_TOKEN_2025";
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 // ── Акцент ─────────────────────────────────────────────────
-const ACCENTS = ['#294EF1','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316'];
+const ACCENTS = [
+  '#294EF1', '#0ea5e9', '#06b6d4', '#10b981', '#84cc16', '#facc15',
+  '#f59e0b', '#f97316', '#ef4444', '#e11d48', '#ec4899', '#8b5cf6',
+  '#111827', '#64748b', '#f8fafc', '#ffffff',
+];
 let accent;
 
 // ── Часы ───────────────────────────────────────────────────
