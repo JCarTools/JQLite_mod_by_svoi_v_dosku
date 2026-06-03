@@ -200,10 +200,3 @@ function runVolumeStep(delta) {
     : (volumeEnumCache.down || fallback);
   return run(cmd);
 }
-
-/** Шаги runEnum для fallback-режима громкости. */
-function changeMediaVolume(delta) {
-  const step = delta > 0 ? 1 : -1;
-  for (let i = 0; i < MEDIA_VOL_STEP; i++) runVolumeStep(step);
-  return true;
-}
