@@ -1,7 +1,7 @@
 // ── Громкость (setvol + echo-suppress, fallback runEnum) ───
 const VolumeManager = (() => {
   const ECHO_SUPPRESS_MS = 1600;
-  const VOL_STEP = 5;
+  const VOL_STEP = 3;
   const ENUM_STEP_MS = 90;
   const DIRECT_COMMIT_MS = 180;
   const POLL_MS = 1000;
