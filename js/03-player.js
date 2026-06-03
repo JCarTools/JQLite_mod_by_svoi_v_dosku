@@ -2,6 +2,8 @@
 let isPlaying = false;
 let trackDuration = 0, trackPosition = 0, positionTimestamp = 0;
 let progressTimer = null;
+let pendingPlayState = null;
+let pendingPlayTimer = null;
 
 function setProgress(pos, dur) {
   const pct = dur > 0 ? Math.min(pos / dur * 100, 100) : 0;
@@ -25,11 +27,45 @@ function stopProgressTick() {
   if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
 }
 
-function setPlayState(playing) {
-  isPlaying = playing;
-  el("icon-play").style.display  = playing ? "none"  : "block";
-  el("icon-pause").style.display = playing ? "block" : "none";
-  if (playing) startProgressTick(); else stopProgressTick();
+function clearPendingPlayState() {
+  pendingPlayState = null;
+  if (pendingPlayTimer) {
+    clearTimeout(pendingPlayTimer);
+    pendingPlayTimer = null;
+  }
+}
+
+function waitForPlayStateConfirm(expected) {
+  pendingPlayState = !!expected;
+  if (pendingPlayTimer) clearTimeout(pendingPlayTimer);
+  pendingPlayTimer = setTimeout(() => {
+    pendingPlayState = null;
+    pendingPlayTimer = null;
+  }, 1500);
+}
+
+function setPlayState(playing, options = {}) {
+  if (!options.keepPending) clearPendingPlayState();
+  isPlaying = !!playing;
+  const playIcon = el("icon-play");
+  const pauseIcon = el("icon-pause");
+  if (playIcon) playIcon.style.display = isPlaying ? "none" : "block";
+  if (pauseIcon) pauseIcon.style.display = isPlaying ? "block" : "none";
+  if (isPlaying) startProgressTick(); else stopProgressTick();
+}
+
+function syncPlayStateFromAndroid(playing) {
+  if (playing == null) return;
+  const confirmed = !!playing;
+  if (pendingPlayState !== null && confirmed !== pendingPlayState) return;
+  setPlayState(confirmed);
+}
+
+function onPlayBtnClick() {
+  const expected = !isPlaying;
+  run(isPlaying ? 'MEDIA_PAUSE' : 'MEDIA_PLAY');
+  setPlayState(expected, { keepPending: true });
+  waitForPlayStateConfirm(expected);
 }
 
 const MuteManager = (() => {
@@ -108,4 +144,4 @@ const MuteManager = (() => {
 
 el('btn-prev')?.addEventListener('click', () => run('MEDIA_BLACK'));
 el('btn-next').addEventListener('click', () => run('MEDIA_NEXT'));
-el('btn-play').addEventListener('click', () => { run(isPlaying ? 'MEDIA_PAUSE' : 'MEDIA_PLAY'); setPlayState(!isPlaying); });
+el('btn-play').addEventListener('click', onPlayBtnClick);

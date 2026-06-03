@@ -1,3 +1,16 @@
+function parsePlaybackState(data) {
+  if (!data || typeof data !== 'object') return null;
+  const raw = data.PlayStat ?? data.playStat ?? data.playstat ?? data.isPlaying ?? data.IsPlaying ?? data.isplaying ?? data.playing
+    ?? data.Playing ?? data.playbackState ?? data.PlaybackState ?? data.state ?? data.State;
+  if (raw == null) return null;
+  if (raw === true || raw === 1) return true;
+  if (raw === false || raw === 0) return false;
+  const value = String(raw).trim().toLowerCase();
+  if (['true', '1', 'yes', 'on', 'play', 'playing', 'started'].includes(value)) return true;
+  if (['false', '0', 'no', 'off', 'pause', 'paused', 'stopped', 'stop'].includes(value)) return false;
+  return null;
+}
+
 window.onAndroidEvent = function(type, data) {
   const typeNorm = String(type || '').toLowerCase();
   const themeTypes = /^(theme|uimode|nightmode|systemtheme|darkmode|uimodechange|daynight|appearance|configurationchanged)$/;
@@ -39,8 +52,8 @@ window.onAndroidEvent = function(type, data) {
       const pos = parseFloat(data.Trpos||0), dur = parseFloat(data.Trdur||0);
       trackDuration = dur; trackPosition = pos; positionTimestamp = Date.now();
       setProgress(pos, dur);
-      const playing = data.isPlaying===true||data.isPlaying==='true'||data.isPlaying===1;
-      if (playing !== isPlaying) setPlayState(playing);
+      const playing = parsePlaybackState(data);
+      syncPlayStateFromAndroid(playing);
       break;
     }
     case 'theme':
