@@ -69,10 +69,13 @@ function onPlayBtnClick() {
 }
 
 const MuteManager = (() => {
+  const MUTE_TRANSITION_MS = 1700;
+
   let userMuted = false;
   let savedVolume = null;
   let restoreTarget = null;
   let toggleLock = false;
+  let muteTransition = false;
 
   function renderVolume(v) {
     const btn = el('btn-mute');
@@ -87,25 +90,31 @@ const MuteManager = (() => {
     btn.setAttribute('aria-pressed', userMuted ? 'true' : 'false');
   }
 
+  function beginMuteTransition() {
+    muteTransition = true;
+    setTimeout(() => { muteTransition = false; }, MUTE_TRANSITION_MS);
+  }
+
   function toggle() {
     if (toggleLock) return;
     toggleLock = true;
     setTimeout(() => { toggleLock = false; }, 400);
+    beginMuteTransition();
 
     if (userMuted) {
       userMuted = false;
       restoreTarget = savedVolume != null && savedVolume > 0 ? savedVolume : 5;
       if (restoreTarget > 0) {
-        VolumeManager.setVolume(restoreTarget);
+        VolumeManager.setVolumeNow(restoreTarget);
       }
     } else {
       const current = VolumeManager.getVolume();
       if (current > 0) savedVolume = current;
       userMuted = true;
       restoreTarget = null;
-      VolumeManager.setVolume(0);
+      VolumeManager.setVolumeNow(0);
     }
-    renderVolume(VolumeManager.getVolume());
+    renderVolume(userMuted ? savedVolume : VolumeManager.getVolume());
   }
 
   function syncFromDevice() {
@@ -117,11 +126,13 @@ const MuteManager = (() => {
   }
 
   function onVolumeChange(v) {
-    if (v > 0) savedVolume = v;
-    if (userMuted && v > 0) {
+    if (!muteTransition && !userMuted && v > 0) {
+      savedVolume = v;
+    }
+    if (userMuted && v > 0 && !muteTransition) {
       userMuted = false;
       restoreTarget = null;
-    } else if (!userMuted && v === 0) {
+    } else if (!userMuted && v === 0 && !muteTransition) {
       userMuted = true;
     } else if (!userMuted && restoreTarget != null && v === restoreTarget) {
       restoreTarget = null;
