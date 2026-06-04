@@ -273,7 +273,10 @@ function applyAccent(color) {
   accent = color;
   const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
   document.body.style.setProperty('--accent', color);
+  document.body.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
+  document.body.style.setProperty('--accent-18', `rgba(${r},${g},${b},0.18)`);
   document.body.style.setProperty('--accent-20', `rgba(${r},${g},${b},0.16)`);
+  document.body.style.setProperty('--accent-24', `rgba(${r},${g},${b},0.24)`);
   document.body.style.setProperty('--accent-30', `rgba(${r},${g},${b},0.24)`);
   document.body.style.setProperty('--accent-50', `rgba(${r},${g},${b},0.42)`);
   document.querySelectorAll('.accent-dot').forEach(d => d.classList.toggle('active', d.dataset.color === color));
